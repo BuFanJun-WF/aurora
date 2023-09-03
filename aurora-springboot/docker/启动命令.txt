@@ -1,0 +1,1 @@
+docker run -d -p 8080:8080 --name aurora-blog-backend aurora-blog-backend:1.0.0
