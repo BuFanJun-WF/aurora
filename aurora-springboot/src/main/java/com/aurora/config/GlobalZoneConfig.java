@@ -7,6 +7,9 @@ import java.util.TimeZone;
 
 import static com.aurora.enums.ZoneEnum.SHANGHAI;
 
+/**
+ * 全局时区配置类
+ */
 @Configuration
 public class GlobalZoneConfig {
 

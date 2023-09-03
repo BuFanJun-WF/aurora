@@ -23,6 +23,9 @@ import java.util.stream.Collectors;
 import static com.aurora.constant.CommonConstant.TRUE;
 import static com.aurora.constant.RabbitMQConstant.SUBSCRIBE_QUEUE;
 
+/**
+ * 订阅消费者
+ */
 @Component
 @RabbitListener(queues = SUBSCRIBE_QUEUE)
 public class SubscribeConsumer {
@@ -41,10 +44,17 @@ public class SubscribeConsumer {
 
     @RabbitHandler
     public void process(byte[] data) {
+        // 将收到的数据转化成文章id
         Integer articleId = JSON.parseObject(new String(data), Integer.class);
+        // 通过文章id查询对应的文章信息
         Article article = articleService.getOne(new LambdaQueryWrapper<Article>().eq(Article::getId, articleId));
-        List<UserInfo> users = userInfoService.list(new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getIsSubscribe, TRUE));
+        // 查询订阅的用户
+        List<UserInfo> users = userInfoService.list(new LambdaQueryWrapper<UserInfo>()
+                .eq(UserInfo::getIsSubscribe, TRUE));
+        // 获取订阅的用户邮件
         List<String> emails = users.stream().map(UserInfo::getEmail).collect(Collectors.toList());
+
+        // 对订阅的用户信息推送消息
         for (String email : emails) {
             EmailDTO emailDTO = new EmailDTO();
             Map<String, Object> map = new HashMap<>();
@@ -53,10 +63,10 @@ public class SubscribeConsumer {
             emailDTO.setTemplate("common.html");
             String url = websiteUrl + "/articles/" + articleId;
             if (article.getUpdateTime() == null) {
-                map.put("content", "花未眠的个人博客发布了新的文章，"
+                map.put("content", "布凡君的JARVIS发布了新的文章，"
                         + "<a style=\"text-decoration:none;color:#12addb\" href=\"" + url + "\">点击查看</a>");
             } else {
-                map.put("content", "花未眠的个人博客对《" + article.getArticleTitle() + "》进行了更新，"
+                map.put("content", "布凡君的JARVIS对《" + article.getArticleTitle() + "》进行了更新，"
                         + "<a style=\"text-decoration:none;color:#12addb\" href=\"" + url + "\">点击查看</a>");
             }
             emailDTO.setCommentMap(map);

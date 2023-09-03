@@ -6,6 +6,9 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+/**
+ * 异步任务配置类
+ */
 @EnableAsync
 @Configuration
 public class AsyncConfig {

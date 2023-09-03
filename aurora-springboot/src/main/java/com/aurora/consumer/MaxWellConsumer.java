@@ -23,15 +23,20 @@ public class MaxWellConsumer {
     @RabbitHandler
     public void process(byte[] data) {
         MaxwellDataDTO maxwellDataDTO = JSON.parseObject(new String(data), MaxwellDataDTO.class);
+        // 转化成文章内容
         Article article = JSON.parseObject(JSON.toJSONString(maxwellDataDTO.getData()), Article.class);
+        // 根据 type 字段的值进行不同的操作
         switch (maxwellDataDTO.getType()) {
+            // "insert" 或 "update"，则将 article 对象转换为 ArticleSearchDTO 对象，并使用 elasticsearchMapper 将其保存到 Elasticsearch 中。
             case "insert":
             case "update":
                 elasticsearchMapper.save(BeanCopyUtil.copyObject(article, ArticleSearchDTO.class));
                 break;
+            // 如果 type 是 "delete"，则根据 article 对象的 id 使用 elasticsearchMapper 删除相应的记录
             case "delete":
                 elasticsearchMapper.deleteById(article.getId());
                 break;
+            // 如果 type 不匹配以上条件，则不执行任何操作
             default:
                 break;
         }
